@@ -1,0 +1,34 @@
+# benchlab default configuration (Ubuntu LTS)
+[general]
+data_root = "/var/log/benchlab"
+sample_hz = 10
+node_name = "vantage-ws-01"
+
+[gpu]
+provider = "nvml"
+device_index = 0
+
+[cpu]
+enable_rapl = true
+
+[benchlab]
+device = "/dev/ttyACM0"
+baud = 115200
+calibration_interval_sec = 60
+
+[pipeline]
+# default stage pair that defines "frametime" for CX
+stage_a = "ingress"
+stage_b = "encoded"
+
+[cx_export]
+enabled = true
+watch_dir = "/mnt/cx-import"
+application_name = "Vantage:Pipeline"
+
+[prometheus]
+bind = "0.0.0.0:9109"
+
+[retention]
+days = 90
+raw_keep_days = 7

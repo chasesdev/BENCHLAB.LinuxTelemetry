@@ -1,0 +1,2 @@
+{"ts_ns": 1000000000, "source":"gpu.nvml","kv":{"gpu_util":10,"power_w":200.0}}
+{"ts_ns": 2000000000, "source":"gpu.nvml","kv":{"gpu_util":20,"power_w":210.0}}

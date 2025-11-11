@@ -1,0 +1,9 @@
+[Unit]
+Description=BENCHLAB Retention/Compaction
+
+[Service]
+Type=oneshot
+User=benchlab
+Group=benchlab
+Environment=BENCHLAB_CONFIG=/etc/benchlab/config.toml
+ExecStart=/usr/bin/python3 /opt/benchlab/apps/retentiond/main.py --run-once

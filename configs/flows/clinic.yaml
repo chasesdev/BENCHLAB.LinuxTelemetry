@@ -1,0 +1,19 @@
+flow: "member_biomarker_journey"
+steps:
+  - id: precheck
+    copy: "Welcome. We'll capture retina images first; you'll see dim lighting."
+    ops:  ["scene:retina_prep", "device:retina:ready"]
+  - id: retina_capture
+    copy: "Look into the viewer; blink twice, hold steady."
+    ops:  ["device:retina:capture", "bookmark:retina_start"]
+    latency_target_ms: 120
+  - id: body_video
+    copy: "Short portrait video."
+    ops:  ["scene:portrait", "device:r5c:record"]
+  - id: body_stills
+    copy: "We’ll take several stills with controlled flash."
+    ops:  ["scene:body_flash", "device:r5mk2:stills"]
+  - id: strength
+    copy: "Grip strength measurement."
+  - id: blood_draw
+    copy: "Standard venipuncture; you may feel a quick pinch."

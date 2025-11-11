@@ -1,0 +1,3 @@
+# Access to BENCHLAB USB serial and capture cards for 'benchlab' group
+KERNEL=="ttyACM*", MODE="0660", GROUP="benchlab", TAG+="uaccess"
+KERNEL=="video[0-9]*", GROUP="benchlab", MODE="0660"

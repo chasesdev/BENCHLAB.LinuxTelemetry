@@ -1,0 +1,7 @@
+psutil
+pynvml
+pyserial
+prometheus_client
+pyarrow
+numpy
+tomli; python_version < '3.11'

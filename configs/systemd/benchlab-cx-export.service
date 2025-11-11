@@ -1,0 +1,18 @@
+[Unit]
+Description=CapFrameX CSV Exporter
+After=benchlab-mux.service
+
+[Service]
+User=benchlab
+Group=benchlab
+Environment=BENCHLAB_CONFIG=/etc/benchlab/config.toml
+ExecStart=/usr/bin/python3 /opt/benchlab/apps/cx_exporter/main.py --daemon
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

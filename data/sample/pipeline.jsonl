@@ -1,0 +1,4 @@
+{"ts_ns": 1000000000, "source":"pipeline","kv":{"stage":"ingress"}}
+{"ts_ns": 1100000000, "source":"pipeline","kv":{"stage":"encoded"}}
+{"ts_ns": 2000000000, "source":"pipeline","kv":{"stage":"ingress"}}
+{"ts_ns": 2180000000, "source":"pipeline","kv":{"stage":"encoded"}}
