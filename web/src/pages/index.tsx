@@ -10,15 +10,17 @@ import { FanPanel } from '../components/FanPanel';
 import { DeviceInfoPanel } from '../components/DeviceInfoPanel';
 import { EnvironmentalPanel } from '../components/EnvironmentalPanel';
 import { SystemArchitectureFlow } from '../components/flow/SystemArchitectureFlow';
+import { PairingVisualizerFlow } from '../components/flow/PairingVisualizerFlow';
 import { useTelemetryStore } from '../store/telemetryStore';
 import { useTelemetryData } from '../hooks/useTelemetryData';
-import { BarChart3, Zap, Fan, Thermometer, Info, Network } from 'lucide-react';
+import { BarChart3, Zap, Fan, Thermometer, Info, Network, X } from 'lucide-react';
 
 type TabType = 'overview' | 'architecture' | 'power' | 'thermal' | 'device';
 
 export default function Home() {
   const { darkMode } = useTelemetryStore();
   const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [isPairingVisualizerOpen, setIsPairingVisualizerOpen] = useState(false);
 
   // Initialize dark mode on mount
   useEffect(() => {
@@ -105,7 +107,9 @@ export default function Home() {
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                   Real-time visualization of the BenchLab telemetry pipeline. Double-click the muxd node to explore pairing logic.
                 </p>
-                <SystemArchitectureFlow />
+                <SystemArchitectureFlow
+                  onPairingVisualizerOpen={() => setIsPairingVisualizerOpen(true)}
+                />
               </div>
             </div>
           )}
@@ -224,7 +228,7 @@ export default function Home() {
           {/* Footer Info */}
           <div className="text-center text-sm text-gray-500 dark:text-gray-400 pt-6 border-t border-gray-200 dark:border-gray-800">
             <p>
-              BenchLab Linux Telemetry v0.2.0 | LinuxSupportKit SDK Integration | Monitoring:{' '}
+              BenchLab Linux Telemetry v0.3.0 | LinuxSupportKit SDK + ReactFlow | Monitoring:{' '}
               <span className="font-mono text-blue-600 dark:text-blue-400">
                 /api/live
               </span>
@@ -232,6 +236,36 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      {/* Pairing Visualizer Modal */}
+      {isPairingVisualizerOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-7xl w-full max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <div>
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                  Latency Pairing Logic Visualizer
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Real-time visualization of event matching within the 2-second pairing window
+                </p>
+              </div>
+              <button
+                onClick={() => setIsPairingVisualizerOpen(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6">
+              <PairingVisualizerFlow />
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
