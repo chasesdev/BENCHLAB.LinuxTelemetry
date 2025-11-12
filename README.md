@@ -1,5 +1,7 @@
 # BenchLab Linux Telemetry
 
+**We're Unofficial. See BenchLab at https://github.com/BenchLab-io/BENCHLAB/**
+
 Pipeline-centric Linux telemetry agent with BENCHLAB power/thermal correlation and CapFrameX-compatible exporter.
 
 ## Table of Contents
