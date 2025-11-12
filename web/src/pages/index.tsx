@@ -33,8 +33,8 @@ export default function Home() {
     }
   }, []);
 
-  // Fetch telemetry data every second
-  useTelemetryData(1000);
+  // Fetch telemetry data using interval from store
+  useTelemetryData();
 
   const tabs: Array<{ id: TabType; label: string; icon: any }> = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },

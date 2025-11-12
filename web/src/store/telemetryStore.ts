@@ -79,6 +79,11 @@ interface TelemetryState {
   // Zoom state
   zoomDomain: { start: number; end: number } | null;
 
+  // Connection & Polling State
+  pollingInterval: 500 | 1000 | 2000 | 5000; // milliseconds
+  connectionMode: 'auto' | 'websocket' | 'polling';
+  connectionStatus: 'connected' | 'disconnected' | 'connecting' | 'error';
+
   // Actions
   addDataPoint: (point: TelemetryDataPoint) => void;
   addDataPoints: (points: TelemetryDataPoint[]) => void;
@@ -90,6 +95,9 @@ interface TelemetryState {
   setError: (error: string | null) => void;
   calculateStats: () => void;
   clearData: () => void;
+  setPollingInterval: (interval: 500 | 1000 | 2000 | 5000) => void;
+  setConnectionMode: (mode: 'auto' | 'websocket' | 'polling') => void;
+  setConnectionStatus: (status: 'connected' | 'disconnected' | 'connecting' | 'error') => void;
 }
 
 const calculatePercentile = (sorted: number[], percentile: number): number => {
@@ -139,6 +147,11 @@ export const useTelemetryStore = create<TelemetryState>((set, get) => ({
   isLoading: false,
   error: null,
   zoomDomain: null,
+
+  // Connection & Polling State
+  pollingInterval: 1000, // Default 1 second
+  connectionMode: 'auto', // Auto-detect best mode
+  connectionStatus: 'disconnected',
 
   // Actions
   addDataPoint: (point) => {
@@ -203,4 +216,10 @@ export const useTelemetryStore = create<TelemetryState>((set, get) => ({
   },
 
   clearData: () => set({ data: [], stats: null }),
+
+  setPollingInterval: (interval) => set({ pollingInterval: interval }),
+
+  setConnectionMode: (mode) => set({ connectionMode: mode }),
+
+  setConnectionStatus: (status) => set({ connectionStatus: status }),
 }));
