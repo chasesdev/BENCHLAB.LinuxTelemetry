@@ -1,10 +1,49 @@
 import { create } from 'zustand';
 
+export interface PowerRail {
+  rail: number;
+  voltage: number;
+  current: number;
+  power: number;
+}
+
+export interface Fan {
+  fan: number;
+  enabled: boolean;
+  duty: number;
+  rpm: number;
+}
+
+export interface DeviceInfo {
+  uid: string;
+  name: string;
+  firmware: string;
+  vendor_id: number;
+  product_id: number;
+}
+
+export interface Calibration {
+  status: string;
+  loaded: boolean;
+  data: Record<string, any>;
+}
+
 export interface TelemetryDataPoint {
   t: number;
   lat_ms: number;
   power_w: number | null;
   timestamp: number; // Unix timestamp
+
+  // Expanded BENCHLAB sensor data
+  voltages?: number[];
+  powerRails?: PowerRail[];
+  fans?: Fan[];
+  temps?: Record<string, number>;
+  humidity?: number;
+  vdd?: number;
+  vref?: number;
+  deviceInfo?: DeviceInfo;
+  calibration?: Calibration;
 }
 
 export interface TelemetryStats {
@@ -27,6 +66,7 @@ export interface TelemetryStats {
 interface TelemetryState {
   // Data
   data: TelemetryDataPoint[];
+  dataPoints: TelemetryDataPoint[]; // Alias for compatibility with new components
   stats: TelemetryStats | null;
 
   // UI State
@@ -87,6 +127,9 @@ const computeStats = (data: TelemetryDataPoint[]): TelemetryStats | null => {
 export const useTelemetryStore = create<TelemetryState>((set, get) => ({
   // Initial state
   data: [],
+  get dataPoints() {
+    return get().data;
+  },
   stats: null,
   isPaused: false,
   timeWindow: 60,

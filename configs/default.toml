@@ -16,6 +16,18 @@ device = "/dev/ttyACM0"
 baud = 115200
 calibration_interval_sec = 60
 
+[benchlab_sdk]
+# LinuxSupportKit HTTP API integration
+http_endpoint = "http://localhost:8080"
+api_key = "your-api-key-here"
+device_timeout_ms = 2000
+enable_multi_device = false
+enable_rgb_feedback = false
+enable_auto_fan_control = false
+fan_temp_threshold_c = 60.0
+fan_min_duty = 64
+fan_max_duty = 255
+
 [pipeline]
 # default stage pair that defines "frametime" for CX
 stage_a = "ingress"

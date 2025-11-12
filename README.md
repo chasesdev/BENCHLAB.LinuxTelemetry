@@ -4,6 +4,7 @@ Pipeline-centric Linux telemetry agent with BENCHLAB power/thermal correlation a
 
 ## Table of Contents
 - [Overview](#overview)
+- [LinuxSupportKit Integration](#linuxsupportkit-integration)
 - [Architecture & Data Flow](#architecture--data-flow)
 - [Components](#components)
 - [Hardware Requirements](#hardware-requirements)
@@ -24,6 +25,253 @@ Pipeline-centric Linux telemetry agent with BENCHLAB power/thermal correlation a
 - **CapFrameX-compatible export** for integration with existing analysis tools
 - **Real-time Prometheus metrics** for monitoring and alerting
 - **Web UI** for operational visibility and member narrative tracking
+
+## LinuxSupportKit Integration
+
+**BenchLab Linux Telemetry** integrates with the [BENCHLAB.LinuxSupportKit](https://github.com/benchlab/BENCHLAB.LinuxSupportKit) project, which provides comprehensive device drivers, REST API, and Python SDK for BENCHLAB hardware.
+
+### Integration Architecture
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│                  BENCHLAB.LinuxSupportKit                      │
+│  ┌──────────────┐  ┌────────────┐  ┌────────────────────┐    │
+│  │   benchlabd  │  │  Python    │  │   CLI Tools        │    │
+│  │   HTTP API   │  │    SDK     │  │   (benchlab-cli)   │    │
+│  │   :8080      │  │            │  │                    │    │
+│  └──────┬───────┘  └─────┬──────┘  └──────┬─────────────┘    │
+│         │                 │                │                   │
+│         └─────────────────┴────────────────┘                   │
+│                           │                                    │
+│                    Binary Protocol (15 commands)               │
+│                           │                                    │
+│                    ┌──────▼────────┐                           │
+│                    │  BENCHLAB USB │                           │
+│                    │  /dev/ttyACM0 │                           │
+│                    └───────────────┘                           │
+└────────────────────────────────────────────────────────────────┘
+                           │
+                           │ SDK/API Integration
+                           ▼
+┌────────────────────────────────────────────────────────────────┐
+│              BENCHLAB.LinuxTelemetry (This Project)            │
+│  ┌──────────────────────────────────────────────────────────┐ │
+│  │   benchlabd/main.py                                       │ │
+│  │   - Uses Python SDK for device communication              │ │
+│  │   - Captures 50+ sensor values (vs 4 basic serial)       │ │
+│  │   - Device discovery, calibration, RGB/fan control       │ │
+│  └──────────────────────────────────────────────────────────┘ │
+│  ┌──────────────────────────────────────────────────────────┐ │
+│  │   muxd/main.py                                            │ │
+│  │   - Prometheus metrics for all 50+ sensors                │ │
+│  │   - 30+ new metric types (power rails, fans, temps)      │ │
+│  └──────────────────────────────────────────────────────────┘ │
+│  ┌──────────────────────────────────────────────────────────┐ │
+│  │   Web Dashboard                                           │ │
+│  │   - Power Rails Chart (11 channels)                       │ │
+│  │   - Fan Control Panel (9 fans)                            │ │
+│  │   - Environmental Monitoring (6 temp sensors)             │ │
+│  │   - Device Info & Calibration Status                      │ │
+│  └──────────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────────────┘
+```
+
+### What LinuxSupportKit Provides
+
+**REST API (benchlabd HTTP daemon)**
+- Full binary protocol implementation (15 commands)
+- Device discovery and management
+- Real-time sensor streaming
+- Calibration read/write/factory reset
+- RGB LED control and fan management
+
+**Python SDK**
+- High-level `BenchLabClient` class
+- Handles all 15 binary protocol commands
+- Automatic device discovery
+- Built-in error handling and retries
+
+**50+ Sensor Values**
+- **13 voltage channels** - Multi-rail voltage monitoring
+- **11 power channels** - Voltage, current, and watts per rail
+- **9 fan channels** - RPM, duty cycle, enable status
+- **6 temperature sensors** - Chip, ambient, 4 external probes
+- **Environmental** - Humidity sensor
+- **System** - Vdd, Vref reference voltages
+- **Device metadata** - UID, name, firmware version
+- **Calibration** - Status and coefficients
+
+### Integration Benefits
+
+**Before SDK Integration (Basic Serial):**
+- 4 basic measurements (power, voltage, current, temp)
+- Text-based protocol parsing
+- No device identification
+- No calibration support
+- Manual serial port configuration
+
+**After SDK Integration:**
+- **50+ sensor values** with structured data
+- **Binary protocol** for reliability and performance
+- **Device discovery** with UID tracking
+- **Calibration management** and validation
+- **Control features** (RGB LEDs, fan automation)
+- **Multi-device support** via HTTP API
+- **Comprehensive Prometheus metrics** (30+ new types)
+
+### SDK vs API vs CLI
+
+**Use Python SDK when:**
+- Writing Python telemetry agents (like this project)
+- Need programmatic access to all features
+- Want automatic error handling and retries
+- Building custom analytics or control applications
+
+**Use HTTP API when:**
+- Non-Python applications or scripts
+- Remote device access over network
+- Microservices architecture
+- Integration with other monitoring systems
+
+**Use CLI when:**
+- Manual device management
+- Shell scripts and automation
+- Quick diagnostics and testing
+- Calibration workflows
+
+### Configuration
+
+Enable SDK integration in `/etc/benchlab/config.toml`:
+
+```toml
+[benchlab_sdk]
+http_endpoint = "http://localhost:8080"
+api_key = "your-api-key-here"
+device_timeout_ms = 2000
+enable_multi_device = false
+enable_rgb_feedback = false
+enable_auto_fan_control = false
+fan_temp_threshold_c = 60.0
+fan_min_duty = 64    # 25% duty cycle
+fan_max_duty = 255   # 100% duty cycle
+```
+
+### New Prometheus Metrics
+
+The SDK integration adds 30+ new Prometheus metrics:
+
+**Voltage Channels (13):**
+- `benchlab_voltage_v{channel="0..12"}`
+
+**Power Rails (11):**
+- `benchlab_power_voltage_v{rail="0..10"}`
+- `benchlab_power_current_a{rail="0..10"}`
+- `benchlab_power_w{rail="0..10"}`
+- `benchlab_total_power_w` - Sum of all rails
+
+**Fan Channels (9):**
+- `benchlab_fan_enabled{fan="0..8"}`
+- `benchlab_fan_duty{fan="0..8"}`
+- `benchlab_fan_rpm{fan="0..8"}`
+
+**Temperature Sensors (6):**
+- `benchlab_temp_c{sensor="chip|ambient|ext1|ext2|ext3|ext4"}`
+
+**Environmental:**
+- `benchlab_humidity_pct`
+- `benchlab_vdd_v`
+- `benchlab_vref_v`
+
+**Device Metadata:**
+- `benchlab_device{uid, name, firmware, vendor_id, product_id}` (Info type)
+- `benchlab_calibration_valid` - 1 if valid, 0 if invalid
+
+### Device Control Features
+
+**RGB LED Status Feedback:**
+```bash
+# Enable RGB feedback in benchlabd
+--enable-rgb
+
+# LEDs indicate latency:
+# Green (<10ms) - Good performance
+# Yellow (10-20ms) - Warning
+# Red (>20ms) - Critical
+```
+
+**Automatic Fan Control:**
+```bash
+# Enable auto fan control
+--enable-auto-fan
+
+# Fans automatically adjust based on temperature:
+# Threshold: 60°C (configurable)
+# Range: 25% to 100% duty cycle
+```
+
+### Installation
+
+1. **Install LinuxSupportKit HTTP daemon:**
+```bash
+# Build LinuxSupportKit
+cd ~/github/BENCHLAB.LinuxSupportKit
+cargo build --release
+
+# Binary will be at: target/release/benchlabd
+```
+
+2. **Install SDK to LinuxTelemetry:**
+```bash
+# The install.sh script automatically copies the SDK
+cd ~/github/BENCHLAB.LinuxTelemetry
+sudo ./scripts/install.sh
+
+# SDK installed to: /opt/benchlab/libs/benchlab_sdk/
+```
+
+3. **Start services:**
+```bash
+# HTTP API daemon (from LinuxSupportKit)
+sudo systemctl start benchlab-http.service
+
+# Telemetry agent (this project)
+sudo systemctl start benchlab-usb.service
+```
+
+### Troubleshooting
+
+**Device not found:**
+```bash
+# Check USB connection
+lsusb | grep -i benchlab
+
+# Check udev rules
+ls -l /dev/ttyACM*
+
+# Verify HTTP API is running
+curl http://localhost:8080/health
+```
+
+**Calibration invalid:**
+```bash
+# Check calibration status
+benchlab-cli get-calibration /dev/ttyACM0
+
+# Perform factory calibration if needed
+benchlab-cli factory-calibrate /dev/ttyACM0
+```
+
+**SDK import errors:**
+```bash
+# Verify SDK is installed
+ls /opt/benchlab/libs/benchlab_sdk/
+
+# Check Python path
+export PYTHONPATH=/opt/benchlab/libs:$PYTHONPATH
+
+# Test SDK import
+python3 -c "from benchlab_sdk.benchlab_client import BenchLabClient; print('OK')"
+```
 
 ## Architecture & Data Flow
 
