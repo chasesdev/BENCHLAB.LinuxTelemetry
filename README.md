@@ -216,25 +216,49 @@ Manages data lifecycle by removing old raw data and sessions based on configurab
 ```
 
 ### web
-**Embedded Next.js UI for Ops + Member Narrative**
+**Advanced Monitoring Dashboard (Next.js + Recharts)**
 
-Web interface providing real-time visualization and operational monitoring.
+Professional real-time telemetry dashboard with comprehensive visualization and analytics.
 
-**Features:**
-- Live latency/power chart via `/api/live`
-- Session browser
-- Member narrative tracking (biomarker journey workflows)
-- Responsive design
+**Core Features:**
+- **Real-time dual-axis line chart** - Latency and power with gradient fills
+- **8 statistics cards** - Min/max/avg/p95/p99 with trend indicators
+- **Correlation scatter plot** - Latency vs power efficiency analysis
+- **Latency distribution histogram** - Performance consistency visualization
+- **Dark mode** - Toggle with localStorage persistence
+- **Interactive controls** - Pause/resume, time window selection (30s/1m/5m/15m)
+- **Export functionality** - Download data as CSV
+- **Responsive layout** - Optimized for desktop and mobile
+- **Glass morphism design** - Modern UI with smooth animations
+
+**Technology Stack:**
+- Recharts 2.12 (charting library)
+- Tailwind CSS 3.4 (styling with dark mode)
+- Zustand 4.5 (state management)
+- Lucide React (modern icons)
+- TypeScript (type safety)
 
 **Development:**
 ```bash
-cd web && npm install && npm run dev
+cd web
+npm install
+npm run dev
+# Open http://localhost:3010
 ```
 
 **Production Build:**
 ```bash
-cd web && npm run build && npm start
+cd web
+npm run build
+npm start
 ```
+
+**Dashboard Features:**
+- **Live Updates**: Polls `/api/live` every 1 second
+- **Time Windows**: 30s, 1min, 5min, 15min views
+- **Statistics**: Real-time calculation of min/max/avg/p95/p99
+- **Color Coding**: Green (<10ms), yellow (10-20ms), red (>20ms) for latency
+- **Export**: One-click CSV download with timestamps
 
 ## Hardware Requirements
 
@@ -610,7 +634,47 @@ Returns recent latency and power data for visualization.
 
 ## Examples & Use Cases
 
-### 1. Running with Sample Data
+### 1. Using the Web Dashboard
+
+Start the monitoring dashboard to visualize telemetry data in real-time:
+
+```bash
+# Terminal 1: Start telemetry daemons (or use --simulate for demo)
+python apps/telemetryd/main.py --session dev --simulate &
+python apps/benchlabd/main.py --session dev --simulate &
+python apps/pipeline_probes/r5c_capture.py --session dev --simulate &
+
+# Terminal 2: Start muxd (alignment + Prometheus)
+python apps/muxd/main.py --session dev --pair ingress encoded
+
+# Terminal 3: Start web dashboard
+cd web
+npm install
+npm run dev
+```
+
+Open **http://localhost:3010** to access the dashboard:
+
+**Dashboard Overview:**
+- Top row: 8 real-time statistics cards showing current/min/max/avg/p95/p99
+- Main chart: Dual-axis line chart with latency (blue) and power (pink)
+- Side panel: Correlation scatter plot + latency distribution histogram
+- Header controls: Dark mode, pause/resume, time window selector, CSV export
+
+**Interactive Features:**
+- **Dark Mode**: Click moon/sun icon to toggle (persists in localStorage)
+- **Pause**: Freeze updates to inspect specific data points
+- **Time Window**: Switch between 30s, 1min, 5min, 15min views
+- **Export**: Download current data as CSV file
+- **Color Coding**: Latency values auto-color (green/yellow/red)
+
+**Dashboard Tips:**
+- Watch for correlation between power spikes and latency increases
+- Use histogram to identify performance consistency
+- Monitor p95/p99 for tail latency issues
+- Export CSV for external analysis in Excel/CapFrameX
+
+### 2. Running with Sample Data
 
 Use provided sample data for testing:
 
@@ -634,7 +698,7 @@ Or use the convenience script:
 ./scripts/dev_run.sh
 ```
 
-### 2. Viewing in CapFrameX
+### 3. Viewing in CapFrameX
 
 1. Export data to CSV:
    ```bash
@@ -649,7 +713,7 @@ Or use the convenience script:
 
 5. Check `Note_Power_W` column for correlated power readings
 
-### 3. Grafana Integration
+### 4. Grafana Integration
 
 **Add Prometheus Data Source:**
 1. Configuration → Data Sources → Add Prometheus
@@ -673,7 +737,7 @@ Or use the convenience script:
   rate(benchlab_pipeline_dropped[1m])
   ```
 
-### 4. Member Biomarker Journey Workflow
+### 5. Member Biomarker Journey Workflow
 
 The `configs/flows/clinic.yaml` example demonstrates using pipeline telemetry for medical imaging workflows:
 
@@ -692,7 +756,7 @@ steps:
 - Generate member-facing narrative with performance metrics
 - Export to CapFrameX for quality assurance analysis
 
-### 5. Multi-Stage Pipeline Analysis
+### 6. Multi-Stage Pipeline Analysis
 
 Monitor complex pipelines with multiple stages:
 
@@ -710,7 +774,7 @@ python apps/cx_exporter/main.py --stage-a ingress --stage-b encoded --out encode
 python apps/cx_exporter/main.py --stage-a encoded --stage-b inference_done --out inference_latency.csv
 ```
 
-### 6. Long-Term Performance Tracking
+### 7. Long-Term Performance Tracking
 
 Use retention policy for historical analysis:
 
