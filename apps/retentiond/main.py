@@ -36,7 +36,7 @@ def main():
             try: shutil.rmtree(sess)
             except Exception: pass
 
-    if not args.run-once:
+    if not args.run_once:
         # daemonize
         while True:
             time.sleep(86400)

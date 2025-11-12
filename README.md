@@ -534,14 +534,20 @@ npm start
 
 ### Software Dependencies
 
+- **BENCHLAB.LinuxSupportKit**: Required for hardware integration
+  - HTTP service (`benchlabd`) for device communication
+  - Python SDK (bundled in `libs/benchlab_sdk/`) - synced from LinuxSupportKit
+  - Install instructions: https://github.com/benchlab/BENCHLAB.LinuxSupportKit
 - **Python packages**: See `requirements.txt`
   - `pynvml` - NVIDIA GPU monitoring
-  - `pyserial` - BENCHLAB USB communication
+  - `requests` - BenchLab SDK HTTP client
   - `prometheus_client` - Metrics export
   - `psutil` - System telemetry
   - `pyarrow` - Parquet storage
 - **Node.js**: 18+ (for web UI)
 - **GStreamer**: 1.0+ (optional, for pipeline probes)
+
+**Note**: The BenchLab Python SDK is included in this repository at `libs/benchlab_sdk/` and is automatically synced with the LinuxSupportKit project. The SDK requires the LinuxSupportKit HTTP service to be running for hardware communication.
 
 ## Quickstart (Developer)
 
