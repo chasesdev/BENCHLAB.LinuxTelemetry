@@ -78,7 +78,7 @@ const FanGauge: React.FC<FanGaugeProps> = ({ fanIndex, enabled, duty, rpm, darkM
   );
 };
 
-export const FanPanel: React.FC = () => {
+export const FanPanel: React.FC = React.memo(() => {
   const { dataPoints, darkMode } = useTelemetryStore();
 
   const latestData = dataPoints[dataPoints.length - 1];
@@ -118,4 +118,4 @@ export const FanPanel: React.FC = () => {
       </div>
     </div>
   );
-};
+});

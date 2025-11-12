@@ -142,4 +142,4 @@ const RealtimeChart: React.FC<RealtimeChartProps> = ({ height = 400 }) => {
   );
 };
 
-export default RealtimeChart;
+export default React.memo(RealtimeChart);

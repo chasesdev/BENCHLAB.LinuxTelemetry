@@ -115,4 +115,4 @@ const LatencyHistogram: React.FC = () => {
   );
 };
 
-export default LatencyHistogram;
+export default React.memo(LatencyHistogram);

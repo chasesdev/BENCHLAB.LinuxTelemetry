@@ -134,4 +134,4 @@ const DashboardControls: React.FC = () => {
   );
 };
 
-export default DashboardControls;
+export default React.memo(DashboardControls);

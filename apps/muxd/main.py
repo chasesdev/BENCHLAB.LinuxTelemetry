@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-import os, time, json, pathlib, argparse, socket
+import os, time, json, pathlib, argparse, socket, gzip, sys
 from datetime import datetime
+from typing import IO
 from prometheus_client import start_http_server, Gauge, Counter, Info
 from .latency import Pairer
 
@@ -22,6 +23,35 @@ def tail_file(path):
                 time.sleep(0.05); continue
             yield line
 
+def rotate_file_if_needed(out_file: IO, base_path: pathlib.Path, current_hour: int) -> tuple[IO, int]:
+    """Rotate log file hourly and compress old files"""
+    new_hour = datetime.utcnow().hour
+    if new_hour != current_hour:
+        # Close current file
+        out_file.close()
+
+        # Rename with timestamp
+        timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%SZ")
+        archived_path = base_path.parent / f"{base_path.stem}-{timestamp}.jsonl"
+        if base_path.exists():
+            base_path.rename(archived_path)
+
+            # Compress archived file in background (optional but saves 70% space)
+            try:
+                with open(archived_path, 'rb') as f_in:
+                    with gzip.open(f"{archived_path}.gz", 'wb') as f_out:
+                        f_out.writelines(f_in)
+                archived_path.unlink()  # Remove uncompressed version
+            except Exception as e:
+                print(f"Warning: Compression failed: {e}", file=sys.stderr)
+
+        # Open new file
+        new_file = base_path.open("a")
+        print(f"Rotated log file to {archived_path}.gz")
+        return new_file, new_hour
+
+    return out_file, current_hour
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--data-root", default=os.environ.get("BENCHLAB_DATA_ROOT","/var/log/benchlab"))
@@ -37,7 +67,8 @@ def main():
     raw_pipeline = root / "raw" / "pipeline.jsonl"
     raw_telemetry = root / "raw" / "telemetry.jsonl"
     raw_benchlab = root / "raw" / "benchlab.jsonl"
-    aligned_latency = (root / "aligned" / "latency.jsonl").open("a")
+    aligned_latency_path = root / "aligned" / "latency.jsonl"
+    aligned_latency = aligned_latency_path.open("a")
 
     # Prometheus - Pipeline metrics
     host = socket.gethostname()
@@ -94,8 +125,12 @@ def main():
 
     last_power = None
     device_info_set = False
+    current_hour = datetime.utcnow().hour
 
     while True:
+        # Rotate log file hourly
+        aligned_latency, current_hour = rotate_file_if_needed(aligned_latency, aligned_latency_path, current_hour)
+
         # multiplex read (simple round-robin)
         for key, gen in list(tails.items()):
             try:

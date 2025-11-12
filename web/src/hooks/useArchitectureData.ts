@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ArchitectureData } from '../pages/api/architecture';
 
-export function useArchitectureData(intervalMs: number = 2000) {
+export function useArchitectureData(intervalMs: number = 10000) {
   const [data, setData] = useState<ArchitectureData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

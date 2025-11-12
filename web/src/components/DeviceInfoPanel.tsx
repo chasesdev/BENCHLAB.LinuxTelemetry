@@ -2,7 +2,7 @@ import React from 'react';
 import { Cpu, CheckCircle, XCircle, AlertCircle, Activity } from 'lucide-react';
 import { useTelemetryStore } from '../store/telemetryStore';
 
-export const DeviceInfoPanel: React.FC = () => {
+export const DeviceInfoPanel: React.FC = React.memo(() => {
   const { dataPoints, darkMode } = useTelemetryStore();
 
   const latestData = dataPoints[dataPoints.length - 1];
@@ -144,4 +144,4 @@ export const DeviceInfoPanel: React.FC = () => {
       </div>
     </div>
   );
-};
+});

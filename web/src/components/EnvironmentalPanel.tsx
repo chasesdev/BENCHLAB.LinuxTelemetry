@@ -22,7 +22,7 @@ const TEMP_COLORS = [
   '#14b8a6'  // teal
 ];
 
-export const EnvironmentalPanel: React.FC = () => {
+export const EnvironmentalPanel: React.FC = React.memo(() => {
   const { dataPoints, darkMode } = useTelemetryStore();
 
   const latestData = dataPoints[dataPoints.length - 1];
@@ -194,4 +194,4 @@ export const EnvironmentalPanel: React.FC = () => {
       )}
     </div>
   );
-};
+});

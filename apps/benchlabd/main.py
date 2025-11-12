@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-import os, sys, time, json, pathlib, argparse, statistics, random
+import os, sys, time, json, pathlib, argparse, statistics, random, gzip
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, IO
 
 # Add libs to path for SDK import
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent.parent / "libs"))
@@ -144,6 +144,35 @@ def parse_sensor_reading(reading: Dict[str, Any]) -> Dict[str, Any]:
 
     return parsed
 
+def rotate_file_if_needed(out_file: IO, base_path: pathlib.Path, current_hour: int) -> tuple[IO, int]:
+    """Rotate log file hourly and compress old files"""
+    new_hour = datetime.utcnow().hour
+    if new_hour != current_hour:
+        # Close current file
+        out_file.close()
+
+        # Rename with timestamp
+        timestamp = datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%SZ")
+        archived_path = base_path.parent / f"{base_path.stem}-{timestamp}.jsonl"
+        if base_path.exists():
+            base_path.rename(archived_path)
+
+            # Compress archived file in background (optional but saves 70% space)
+            try:
+                with open(archived_path, 'rb') as f_in:
+                    with gzip.open(f"{archived_path}.gz", 'wb') as f_out:
+                        f_out.writelines(f_in)
+                archived_path.unlink()  # Remove uncompressed version
+            except Exception as e:
+                print(f"Warning: Compression failed: {e}", file=sys.stderr)
+
+        # Open new file
+        new_file = base_path.open("a")
+        print(f"Rotated log file to {archived_path}.gz")
+        return new_file, new_hour
+
+    return out_file, current_hour
+
 def control_rgb_status(client: 'BenchLabClient', device_path: str,
                        latency_ms: float, enable_rgb: bool = False):
     """Control RGB LEDs based on pipeline latency"""
@@ -230,19 +259,23 @@ def main():
 
     # Open output file (per-device if multi-device mode)
     if device_info and device_info['uid'] != "simulated":
-        out_file = root / "raw" / f"benchlab-{device_info['uid']}.jsonl"
+        out_file_path = root / "raw" / f"benchlab-{device_info['uid']}.jsonl"
     else:
-        out_file = root / "raw" / "benchlab.jsonl"
+        out_file_path = root / "raw" / "benchlab.jsonl"
 
-    out = out_file.open("a")
-    print(f"Writing telemetry to {out_file}")
+    out = out_file_path.open("a")
+    print(f"Writing telemetry to {out_file_path}")
 
     # Main telemetry loop
     sample_count = 0
     last_fan_control = time.time()
+    current_hour = datetime.utcnow().hour
 
     while True:
         ts = clock_ns()
+
+        # Rotate log file hourly
+        out, current_hour = rotate_file_if_needed(out, out_file_path, current_hour)
 
         if client and not args.simulate:
             try:

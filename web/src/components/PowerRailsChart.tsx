@@ -18,7 +18,7 @@ const RAIL_COLORS = [
   '#3b82f6'
 ];
 
-export const PowerRailsChart: React.FC = () => {
+export const PowerRailsChart: React.FC = React.memo(() => {
   const { dataPoints, darkMode } = useTelemetryStore();
 
   // Transform data for stacked area chart
@@ -99,4 +99,4 @@ export const PowerRailsChart: React.FC = () => {
       </AreaChart>
     </ResponsiveContainer>
   );
-};
+});

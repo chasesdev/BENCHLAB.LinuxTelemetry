@@ -1,6 +1,7 @@
 from collections import deque
 
 WINDOW_NS = 2_000_000_000  # pair within 2s
+MAX_BUFFER_SIZE = 100  # prevent unbounded memory growth
 
 class Pairer:
     def __init__(self, a="ingress", b="encoded"):
@@ -10,8 +11,12 @@ class Pairer:
     def add(self, rec):
         stage = rec.get("kv",{}).get("stage")
         if stage == self.a:
+            if len(self.bufA) >= MAX_BUFFER_SIZE:
+                self.bufA.popleft()  # drop oldest to prevent unbounded growth
             self.bufA.append(rec)
         elif stage == self.b:
+            if len(self.bufB) >= MAX_BUFFER_SIZE:
+                self.bufB.popleft()  # drop oldest to prevent unbounded growth
             self.bufB.append(rec)
 
     def pairs(self):

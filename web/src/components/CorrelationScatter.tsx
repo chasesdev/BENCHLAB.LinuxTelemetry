@@ -99,4 +99,4 @@ const CorrelationScatter: React.FC = () => {
   );
 };
 
-export default CorrelationScatter;
+export default React.memo(CorrelationScatter);
