@@ -9,11 +9,12 @@ import { PowerRailsChart } from '../components/PowerRailsChart';
 import { FanPanel } from '../components/FanPanel';
 import { DeviceInfoPanel } from '../components/DeviceInfoPanel';
 import { EnvironmentalPanel } from '../components/EnvironmentalPanel';
+import { SystemArchitectureFlow } from '../components/flow/SystemArchitectureFlow';
 import { useTelemetryStore } from '../store/telemetryStore';
 import { useTelemetryData } from '../hooks/useTelemetryData';
-import { BarChart3, Zap, Fan, Thermometer, Info } from 'lucide-react';
+import { BarChart3, Zap, Fan, Thermometer, Info, Network } from 'lucide-react';
 
-type TabType = 'overview' | 'power' | 'thermal' | 'device';
+type TabType = 'overview' | 'architecture' | 'power' | 'thermal' | 'device';
 
 export default function Home() {
   const { darkMode } = useTelemetryStore();
@@ -32,6 +33,7 @@ export default function Home() {
 
   const tabs: Array<{ id: TabType; label: string; icon: any }> = [
     { id: 'overview', label: 'Overview', icon: BarChart3 },
+    { id: 'architecture', label: 'Architecture', icon: Network },
     { id: 'power', label: 'Power', icon: Zap },
     { id: 'thermal', label: 'Thermal', icon: Thermometer },
     { id: 'device', label: 'Device', icon: Info },
@@ -91,6 +93,21 @@ export default function Home() {
                 </div>
               </div>
             </>
+          )}
+
+          {activeTab === 'architecture' && (
+            <div className="space-y-6">
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                  <Network size={24} />
+                  System Architecture & Data Flow
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Real-time visualization of the BenchLab telemetry pipeline. Double-click the muxd node to explore pairing logic.
+                </p>
+                <SystemArchitectureFlow />
+              </div>
+            </div>
           )}
 
           {activeTab === 'power' && (

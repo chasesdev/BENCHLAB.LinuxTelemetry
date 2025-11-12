@@ -8,22 +8,28 @@
     "start": "next start -p 3010"
   },
   "dependencies": {
+    "@reactflow/background": "^11.3.14",
+    "@reactflow/controls": "^11.2.14",
+    "@reactflow/minimap": "^11.7.14",
+    "@types/dagre": "^0.7.53",
+    "dagre": "^0.8.5",
+    "date-fns": "^3.6.0",
+    "lucide-react": "^0.416.0",
     "next": "14.2.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "reactflow": "^11.11.4",
     "recharts": "^2.12.0",
-    "date-fns": "^3.6.0",
-    "zustand": "^4.5.2",
-    "lucide-react": "^0.416.0",
-    "ws": "^8.17.0"
+    "ws": "^8.17.0",
+    "zustand": "^4.5.2"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
     "@types/react": "^18.3.0",
     "@types/ws": "^8.5.10",
-    "tailwindcss": "^3.4.4",
     "autoprefixer": "^10.4.19",
-    "postcss": "^8.4.38"
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4"
   },
   "type": "module"
 }
