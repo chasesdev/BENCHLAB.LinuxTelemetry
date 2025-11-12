@@ -1,4 +1,4 @@
-# BENCHLAB.LinuxTelemetry
+# BenchLab Linux Telemetry
 
 Pipeline-centric Linux telemetry agent with BENCHLAB power/thermal correlation and CapFrameX-compatible exporter.
 
@@ -15,7 +15,7 @@ Pipeline-centric Linux telemetry agent with BENCHLAB power/thermal correlation a
 
 ## Overview
 
-**BENCHLAB.LinuxTelemetry** is a comprehensive telemetry system designed to correlate pipeline latency metrics with system power consumption and thermal characteristics. It combines:
+**BenchLab Linux Telemetry** is a comprehensive telemetry system designed to correlate pipeline latency metrics with system power consumption and thermal characteristics. It combines:
 
 - **BENCHLAB USB hardware** for high-precision power/current/temperature measurements
 - **System telemetry** (GPU, CPU, NIC, Disk) via NVML and psutil
